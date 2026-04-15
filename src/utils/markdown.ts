@@ -102,7 +102,7 @@ function createExt(theme?:Theme) {
 
             link({href, title, tokens}) {
                 const content = this.parser.parseInline(tokens);
-                return `<a href="${href}" title="${title}" style="${styleToString(theme?.a)}">${content}</a>`;
+                return `<a href="${href}" title="${title??content}" target="_blank" style="${styleToString(theme?.a)}">${content}</a>`;
             },
 
             blockquote({tokens}) {

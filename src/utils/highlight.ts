@@ -36,7 +36,7 @@ function walk(node: Node, language:string) {
         const text = element.innerText;
         const link = getOutLink(text, language);
         if (link) {
-            element.innerHTML = `<a href="" target="_blank" rel="noopener nofollow" style="color:unset;">${text}</a>`
+            element.innerHTML = `<a href="" target="_blank" style="color:unset;">${text}</a>`
         }
         return;
     }
