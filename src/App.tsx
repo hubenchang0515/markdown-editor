@@ -125,7 +125,10 @@ function App() {
                 className="no-print" 
                 style={{
                     display:'flex', 
-                    gap:6
+                    gap:6,
+                    width:'100%',
+                    maxWidth:'calc(420mm + 8px)',
+                    margin:'auto'
                 }}
             >
                 <input ref={inputRef} type="file" style={{display:'none'}}/>
@@ -152,7 +155,10 @@ function App() {
                     display:'flex', 
                     flexDirection: width > 960 ? 'row' : 'column',
                     gap:8, 
-                    overflow:'hidden'
+                    overflow:'hidden',
+                    width:'100%',
+                    maxWidth:'calc(420mm + 8px)',
+                    margin:'auto'
                 }}
             >
                 <Editor
@@ -163,6 +169,7 @@ function App() {
                         minWidth: 0,
                         minHeight: 0,
                         border: `1px solid ${Slate._200}`,
+                        maxWidth: '210mm'
                     }}
                     onInit={(instance) => setEditor(instance)}
                     onEdit={(text) => update(text)}
@@ -175,10 +182,10 @@ function App() {
                         minWidth: 0,
                         minHeight: 0,
                         background:'#fff', 
-                        padding:16, 
                         overflow:'auto', 
                         border: `1px solid ${Slate._200}`,
                         overflowX:'hidden',
+                        maxWidth: '210mm'
                     }} 
                     srcDoc={html}
                 />
