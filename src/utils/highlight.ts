@@ -32,7 +32,7 @@ function walk(node: Node, language:string) {
         }
     });
 
-    if (element.firstChild?.nodeType === Node.TEXT_NODE) {
+    if (element.childNodes.length === 1 && element.firstChild?.nodeType === Node.TEXT_NODE) {
         const text = element.innerText;
         const link = getOutLink(text, language);
         if (link) {
