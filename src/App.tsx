@@ -29,8 +29,17 @@ function App() {
 
     // 预览界面自动滚动
     const scrollToLine = useCallback((line:number) => {
-        const target = iframeRef.current?.contentDocument?.querySelector(`.line-${line}`);
-        target?.scrollIntoView();        
+        while (line > 0) {
+            console.log(line)
+            const target = iframeRef.current?.contentDocument?.querySelector(`.line-${line}`);
+            if (target) {
+                console.log('found', line)
+                target?.scrollIntoView();
+                break;
+            }
+
+            line -= 1;
+        }
     }, [editor]);
 
     // 复制
