@@ -1,7 +1,7 @@
 import { Green, Pink, Red, Slate, type Color } from "../common/Color";
 import type { Theme } from "../common/Theme";
 
-export function CreateDefaultTheme(base:Color, primary:Color, secondary:Color) {
+export function CreateDefaultTheme(primary:Color, secondary:Color, base:Color=Slate) {
     return {
         h1: {
             fontSize: '2.5rem',
@@ -118,6 +118,6 @@ export function CreateDefaultTheme(base:Color, primary:Color, secondary:Color) {
     } as Theme;
 }
 
-const DefaultTheme = CreateDefaultTheme(Slate,Green, Pink)
+const DefaultTheme = CreateDefaultTheme(Green, Pink);
 
 export default DefaultTheme;

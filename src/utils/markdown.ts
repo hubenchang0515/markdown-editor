@@ -1,4 +1,4 @@
-import { marked, type MarkedExtension } from "marked";
+import { Marked, type MarkedExtension } from "marked";
 import type { CSSProperties } from "react";
 import type { Theme } from "../common/Theme";
 import { highlight } from "./highlight";
@@ -54,11 +54,25 @@ function styleToString(style?: CSSProperties): string {
 }
 
 function createExt(theme?:Theme) {
+    let line = 1;
     const ext: MarkedExtension = {
         gfm: true,
         async: true,
 
         async walkTokens(token) {
+            // 重复访问同一个 token
+            if (line in (token as any)) return;
+            
+            // 写入行号
+            (token as any).line = line;
+
+            // 行号增长
+            if (['space', 'br', 'text', 'code', 'table', 'list'].includes(token.type) && token.raw?.includes("\n")) {
+                const count = (token.raw.match(/\n/g) || []).length;
+                line += count;
+            }
+
+            // 图片转 base64
             if (token.type === "image") {
                 const { href } = token;
                 token.href = await urlToBase64(href);
@@ -66,23 +80,25 @@ function createExt(theme?:Theme) {
         },
 
         renderer: {
-            heading({ tokens, depth }) {
-                const content = this.parser.parse(tokens);
+            heading(token) {
+                const content = this.parser.parse(token.tokens);
                 const id = unescapeHTML(content).replace(/\s+/g, "-");
-                switch (depth) {
-                    case 1: return `<h1 id=${id} style="${styleToString(theme?.h1)}">${content}</h${depth}>`;
-                    case 2: return `<h1 id=${id} style="${styleToString(theme?.h2)}">${content}</h${depth}>`;
-                    case 3: return `<h1 id=${id} style="${styleToString(theme?.h3)}">${content}</h${depth}>`;
-                    case 4: return `<h1 id=${id} style="${styleToString(theme?.h4)}">${content}</h${depth}>`;
-                    case 5: return `<h1 id=${id} style="${styleToString(theme?.h5)}">${content}</h${depth}>`;
-                    case 6: return `<h1 id=${id} style="${styleToString(theme?.h6)}">${content}</h${depth}>`;
+                const line = (token as any).line;
+                switch (token.depth) {
+                    case 1: return `<h1 id=${id} class="line-${line}" style="${styleToString(theme?.h1)}">${content}</h1>`;
+                    case 2: return `<h1 id=${id} class="line-${line}" style="${styleToString(theme?.h2)}">${content}</h2>`;
+                    case 3: return `<h1 id=${id} class="line-${line}" style="${styleToString(theme?.h3)}">${content}</h3>`;
+                    case 4: return `<h1 id=${id} class="line-${line}" style="${styleToString(theme?.h4)}">${content}</h4>`;
+                    case 5: return `<h1 id=${id} class="line-${line}" style="${styleToString(theme?.h5)}">${content}</h5>`;
+                    case 6: return `<h1 id=${id} class="line-${line}" style="${styleToString(theme?.h6)}">${content}</h6>`;
                 }
-                return `<h${depth} id=${id}>${content}</h${depth}>`;
+                return `<h${token.depth} id=${id} class="line-${line}">${content}</h${token.depth}>`;
             },
 
-            paragraph({tokens}) {
-                const content = this.parser.parseInline(tokens);
-                return `<p style="${styleToString(theme?.p)}">${content}</p>`;
+            paragraph(token) {
+                const content = this.parser.parseInline(token.tokens);
+                const line = (token as any).line;
+                return `<p class="line-${line}" style="${styleToString(theme?.p)}">${content}</p>`;
             },
 
             strong({tokens}) {
@@ -110,27 +126,48 @@ function createExt(theme?:Theme) {
                 return `<blockquote style="${styleToString(theme?.blockquote)}">${content}</blockquote>`;
             },
 
-            image({href, title, text}) {
-                return `<img src="${href}" title="${title}" alt="${text}" style="${styleToString(theme?.img)}"/>`;
+            image(token) {
+                const line = (token as any).line;
+                return `<img class="line-${line}" src="${token.href}" title="${token.title}" alt="${token.text}" style="${styleToString(theme?.img)}"/>`;
             },
 
             codespan({text}) {
                 return `<code style="${styleToString(theme?.code)}">${text}</code>`
             },
 
-            code({text, lang}) {
-                const highlighted = lang ? highlight(text, lang) : text;
-                return `<pre style="${styleToString(theme?.pre)}"><code>${highlighted}</code></pre>`;
+            code(token) {
+                const highlighted = token.lang ? highlight(token.text, token.lang) : token.text;
+                const line = (token as any).line;
+                return `<pre class="line-${line}" style="${styleToString(theme?.pre)}"><code>${highlighted}</code></pre>`;
             },
 
-            table({header, rows}) {
-                return `<table style="${styleToString(theme?.table)}"><thead><tr>${header.map(head => this.tablecell(head)).join('')}</tr></thead><tbody>${rows.map(row => '<tr>' + row.map(cell => this.tablecell(cell)).join('') + '</tr>').join('')}</tbody></table>`;
+            table(token) {
+                const line = (token as any).line;
+                return `<table class="line-${line}" style="${styleToString(theme?.table)}"><thead><tr>${token.header.map(head => this.tablecell(head)).join('')}</tr></thead><tbody>${token.rows.map(row => '<tr>' + row.map(cell => this.tablecell(cell)).join('') + '</tr>').join('')}</tbody></table>`;
             },
 
             tablecell({header, tokens, align}) {
                 const content = this.parser.parseInline(tokens);
                 return header ? `<th style="text-align:${align};${styleToString(theme?.th)}">${content}</th>` : `<td style="text-align:${align};${styleToString(theme?.td)}">${content}</td>`;
             },
+
+            list(token) {
+                const line = (token as any).line;
+                if (token.ordered) {
+                    return `<ol class="line-${line}" style="${styleToString(theme?.ol)}">${token.items.map(item => this.listitem(item)).join('')}</ol>`
+                } else {
+                    return `<ul class="line-${line}" style="${styleToString(theme?.ul)}">${token.items.map(item => this.listitem(item)).join('')}</ul>`
+                }
+            },
+
+            listitem(token) {
+                const content = this.parser.parse(token.tokens);
+                if (token.loose) {
+                    return `<li style="${styleToString(theme?.li)}"><p>${content}</p></li>`
+                } else {
+                    return `<li style="${styleToString(theme?.li)}">${content}</li>`
+                }
+            }
         }
     }
 
@@ -138,6 +175,7 @@ function createExt(theme?:Theme) {
 }
 
 export async function render(markdown:string, theme?:Theme) {
+    const marked = new Marked();
     marked.use(createExt(theme));
     return marked.parse(markdown, {async:true});
 }

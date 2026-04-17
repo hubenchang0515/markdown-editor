@@ -27,6 +27,12 @@ function App() {
         render(raw, DefaultTheme).then(html => setHtml(html));
     }, [raw]);
 
+    // 预览界面自动滚动
+    const scrollToLine = useCallback((line:number) => {
+        const target = iframeRef.current?.contentDocument?.querySelector(`.line-${line}`);
+        target?.scrollIntoView();        
+    }, [editor]);
+
     // 复制
     const copy = useCallback(() => {
         navigator.clipboard.write([
@@ -162,6 +168,7 @@ function App() {
                 }}
             >
                 <Editor
+                    id="editor"
                     ref={editorRef}
                     className="no-print" 
                     style={{
@@ -173,8 +180,10 @@ function App() {
                     }}
                     onInit={(instance) => setEditor(instance)}
                     onEdit={(text) => update(text)}
+                    onMove={scrollToLine}
                 />
                 <Preview
+                    id="preview"
                     ref={iframeRef}
                     className="print-root" 
                     style={{
@@ -188,6 +197,7 @@ function App() {
                         maxWidth: '210mm'
                     }} 
                     srcDoc={html}
+                    onLoad={() => scrollToLine(editor?.getPosition()?.lineNumber??0)}
                 />
             </main>
         </div>

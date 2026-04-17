@@ -19,4 +19,7 @@ export interface Theme {
     table?: CSSProperties;
     th?: CSSProperties;
     td?: CSSProperties;
+    ol?: CSSProperties;
+    ul?: CSSProperties;
+    li?: CSSProperties;
 }

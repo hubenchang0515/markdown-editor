@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useEffect, useRef } from "react";
+import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
 import * as monaco from 'monaco-editor';
 
 export type EditorInstance = monaco.editor.IStandaloneCodeEditor;
@@ -6,10 +6,12 @@ export type EditorInstance = monaco.editor.IStandaloneCodeEditor;
 export interface EditorProps extends React.HTMLAttributes<HTMLDivElement> {
     onInit?: (editor: EditorInstance) => void;
     onEdit?: (text:string) => void;
+    onMove?: (line:number) => void;
 }
 
 const Editor = forwardRef<HTMLDivElement, EditorProps>((props, ref) => {
     const editorRef = useRef<HTMLDivElement>(null);
+    const [editor, setEditor] = useState<EditorInstance|null>(null);
 
     const setRef = useCallback((element:HTMLDivElement) => {
         editorRef.current = element;
@@ -29,24 +31,50 @@ const Editor = forwardRef<HTMLDivElement, EditorProps>((props, ref) => {
         const editor = monaco.editor.create(editorRef.current!, {
             language: 'markdown',
             automaticLayout: true,
-            scrollBeyondLastLine: false,
+            scrollBeyondLastLine: true,
             quickSuggestions: true,
         });
 
-        // 监听内容变化
-        const disposable = editor.onDidChangeModelContent(() => {
-            props.onEdit?.(editor.getValue())
-        });
-
-        props.onInit?.(editor);
+        setEditor(editor);;
 
         return () => {
-            disposable.dispose();
             editor.dispose();
         }
     }, []);
 
-    const {onInit, onEdit, ...rawProps} = props;
+    // 返回实例
+    useEffect(() => {
+        if (!editor) return;     
+        props.onInit?.(editor);
+    }, [props.onInit, editor]);
+
+    // 监听内容变化
+    useEffect(() => {
+        if (!editor) return;  
+
+        const disposable = editor.onDidChangeModelContent(() => {
+            props.onEdit?.(editor.getValue())
+        });
+
+        return () => {
+            disposable.dispose();
+        }
+    }, [props.onEdit, editor]);
+
+    // 监听滚动
+    useEffect(() => {
+        if (!editor) return;  
+
+        const disposable = editor.onDidScrollChange(() => {
+            props.onMove?.(editor?.getVisibleRanges()[0].startLineNumber ?? 0);
+        });
+        
+        return () => {
+            disposable.dispose();
+        }
+    }, [props.onMove, editor])
+
+    const {onInit, onEdit, onMove, ...rawProps} = props;
     return (
         <div 
             ref={setRef}

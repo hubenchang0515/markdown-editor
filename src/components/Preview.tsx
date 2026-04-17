@@ -11,8 +11,7 @@ const Preview = forwardRef<HTMLIFrameElement, PreviewProps>((props, ref) => {
     return (
         <iframe
             ref={ref}
-            className={props.className}
-            style={props.style}
+            {...props}
             srcDoc={props.srcDoc || ALT_HTML}
         />
     );
