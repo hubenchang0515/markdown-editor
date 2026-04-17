@@ -30,10 +30,8 @@ function App() {
     // 预览界面自动滚动
     const scrollToLine = useCallback((line:number) => {
         while (line > 0) {
-            console.log(line)
             const target = iframeRef.current?.contentDocument?.querySelector(`.line-${line}`);
             if (target) {
-                console.log('found', line)
                 target?.scrollIntoView();
                 break;
             }
