@@ -46,12 +46,13 @@ function walk(node: Node, language:string) {
 
 export function highlight(code:string, language:string) {
     let html = code;
-    const lang = hljs.getLanguage(language)
+    const key = language.trim().split(/\s+/)[0];
+    const lang = hljs.getLanguage(key);
     if (lang) {
-        html = hljs.highlight(code, {language: lang.name!, ignoreIllegals:true}).value;
+        html = hljs.highlight(code, {language: key, ignoreIllegals:true}).value;
         const div = document.createElement('div');
         div.innerHTML = html;
-        walk(div, lang.name!);
+        walk(div, key);
         html = div.innerHTML;
     }
     return html;
