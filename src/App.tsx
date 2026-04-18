@@ -203,8 +203,8 @@ function App() {
                         overflowX:'hidden',
                         maxWidth: '210mm'
                     }} 
-                    srcDoc={html}
-                    onLoad={() => scrollToLine(editor?.getPosition()?.lineNumber??0)}
+                    content={html}
+                    onUpdate={() => scrollToLine(editor?.getPosition()?.lineNumber??0)}
                 />
             </main>
         </div>
