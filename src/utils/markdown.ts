@@ -58,20 +58,24 @@ function createExt(theme?:Theme) {
     const ext: MarkedExtension = {
         gfm: true,
         async: true,
+        
+        hooks: {
+            // 标记行号，此接口不含嵌套的 token
+            processAllTokens(tokens) {
+                for (const token of tokens) {
+                    (token as any).line = line;
+                    if (token.raw?.includes("\n")) {
+                        const count = (token.raw.match(/\n/g) || []).length;
+                        line += count;
+                    }
+                }
 
-        async walkTokens(token) {
-            // 重复访问同一个 token
-            if (line in (token as any)) return;
-            
-            // 写入行号
-            (token as any).line = line;
-
-            // 行号增长
-            if (['space', 'br', 'text', 'code', 'table', 'list'].includes(token.type) && token.raw?.includes("\n")) {
-                const count = (token.raw.match(/\n/g) || []).length;
-                line += count;
+                return tokens;
             }
+        },
 
+        // 此接口包含嵌套的 token
+        async walkTokens(token) {
             // 图片转 base64
             if (token.type === "image") {
                 const { href } = token;
@@ -127,7 +131,6 @@ function createExt(theme?:Theme) {
             },
 
             image(token) {
-                const line = (token as any).line;
                 return `<img class="line-${line}" src="${token.href}" title="${token.title}" alt="${token.text}" style="${styleToString(theme?.img)}"/>`;
             },
 
