@@ -4,14 +4,16 @@ import type { Theme } from "../common/Theme";
 export function CreateDefaultTheme(primary:Color, secondary:Color, base:Color=Slate) {
     return {
         h1: {
-            fontSize: '2.5rem',
+            marginBlock: 16,
+            fontSize: '2rem',
             fontWeight: 'bolder',
             textAlign: 'center',
             color: primary._500,
         },
 
         h2: {
-            fontSize: '2rem',
+            marginBlock: 16,
+            fontSize: '1.5rem',
             fontWeight: 'bold',
             color: primary._500,
             borderLeft: `4px solid ${primary._500}`,
@@ -20,27 +22,31 @@ export function CreateDefaultTheme(primary:Color, secondary:Color, base:Color=Sl
         },
 
         h3: {
-            fontSize: '1.75rem',
+            marginBlock: 16,
+            fontSize: '1.375rem',
             fontWeight: 'bold',
             color: primary._500,
             borderColor: primary._500,
         },
 
         h4: {
-            fontSize: '1.5rem',
-            fontWeight: 'bold',
-            color: primary._500,
-            borderColor: primary._500,
-        },
-
-        h5: {
+            marginBlock: 16,
             fontSize: '1.25rem',
             fontWeight: 'bold',
             color: primary._500,
             borderColor: primary._500,
         },
 
+        h5: {
+            marginBlock: 16,
+            fontSize: '1.125rem',
+            fontWeight: 'bold',
+            color: primary._500,
+            borderColor: primary._500,
+        },
+
         h6: {
+            marginBlock: 16,
             fontSize: '1rem',
             fontWeight: 'bold',
             color: primary._500,
@@ -48,6 +54,7 @@ export function CreateDefaultTheme(primary:Color, secondary:Color, base:Color=Sl
         },
 
         p: {
+            marginBlock: 16,
             fontSize: '1rem',
         },
 
@@ -71,6 +78,7 @@ export function CreateDefaultTheme(primary:Color, secondary:Color, base:Color=Sl
         },
 
         blockquote: {
+            marginBlock: 16,
             backgroundColor: primary._50,
             borderLeft: `4px solid ${primary._400}`,
             margin: 0,
@@ -90,6 +98,7 @@ export function CreateDefaultTheme(primary:Color, secondary:Color, base:Color=Sl
         },
 
         pre: {
+            marginBlock: 16,
             padding: 16,
             background: base._50,
             border: `1px solid ${base._100}`,
@@ -98,6 +107,7 @@ export function CreateDefaultTheme(primary:Color, secondary:Color, base:Color=Sl
         },
 
         table: {
+            marginBlock: 16,
             border: `1px solid ${base._300}`,
             borderCollapse: 'collapse',
             borderCpacing: 0,
@@ -114,6 +124,14 @@ export function CreateDefaultTheme(primary:Color, secondary:Color, base:Color=Sl
             backgroundColor: base._50,
             border: `1px solid ${base._300}`,
             padding: `0.5em 1em`,
+        },
+
+        ul: {
+            marginBlock: 0,
+        },
+
+        ol: {
+            marginBlock: 0,
         },
 
         linenumber: {
