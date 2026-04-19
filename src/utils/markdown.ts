@@ -1,7 +1,8 @@
-import { Marked, type MarkedExtension, type Token } from "marked";
+import { Marked, type MarkedExtension, type Token, type Tokens } from "marked";
 import type { CSSProperties } from "react";
 import type { Theme } from "../common/Theme";
 import { highlight } from "./highlight";
+import { loadFile } from "./db";
 
 // function escapeHTML(text:string) {
 //     const div = document.createElement('div');
@@ -15,21 +16,22 @@ function unescapeHTML(text:string) {
     return div.textContent??"";
 }
 
+function blobToBase64(file:Blob): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.readAsDataURL(file)
+        reader.onload = () => resolve(reader.result as string)
+        reader.onerror = reject
+    })
+}
+
 async function urlToBase64(url:string): Promise<string|null> {
   try {
     // 获取资源
     const response = await fetch(url);
     const blob = await response.blob();
     
-    // 转换为 Base64
-    const base64 = await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-    
-    return base64 as string; // 返回 Data URL
+    return blobToBase64(blob);
   } catch (error) {
     console.error('转换失败:', error);
     return null;
@@ -86,10 +88,15 @@ function createExt(theme?:Theme) {
         },
 
         async walkTokens(token) {
-            // 图片转 base64
+            // 图片转 base64，以便复制
             if (token.type === "image") {
-                const { href } = token;
-                token.href = await urlToBase64(href);
+                const { href } = token as Tokens.Image;
+                if (href.startsWith("IDB:")) {
+                    const res = await loadFile(href.slice(4));
+                    token.href = await blobToBase64(res.file);
+                } else {
+                    token.href = await urlToBase64(href);
+                }
             }
         },
 

@@ -32,25 +32,36 @@ function openDB():Promise<IDBDatabase> {
     });
 }
 
-export function saveFile(file:File) {
-    return new Promise((resolve) => {
+export function storeFile(file:File) {
+    return new Promise<FileItem>((resolve) => {
         openDB().then((db) => {
-            const tx = db.transaction(STORE_NAME, 'readwrite');
-            const store = tx.objectStore(STORE_NAME);
             sha256(file).then(id => {
                 const data:FileItem = {
                     id: id ,
                     name: file.name,
                     file: file,
                 };
-
+                
+                const tx = db.transaction(STORE_NAME, 'readwrite');
+                const store = tx.objectStore(STORE_NAME);
                 const req = store.put(data);
                 req.onsuccess = () => {
-                    resolve(req.result);
+                    resolve(data);
                 }
             });
         });
     });
 }
 
-// TODO：将插入的图片存入 IndexedDB，并生成持久性的 URL
+export function loadFile(id:string) {
+    return new Promise<FileItem>((resolve) => {
+        openDB().then((db) => {
+            const tx = db.transaction(STORE_NAME, 'readonly');
+            const store = tx.objectStore(STORE_NAME);
+            const req = store.get(id);
+            req.onsuccess = () => {
+                resolve(req.result);
+            }
+        });
+    });
+}

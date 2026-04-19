@@ -7,6 +7,7 @@ import Preview from "./components/Preview";
 import Button from "./components/Button";
 import debounce from "./utils/debounce";
 import QrCodeDialog from "./dialogs/QrCodeDialog";
+import { storeFile } from "./utils/db";
 
 function App() {
     const inputRef = useRef<HTMLInputElement>(null);
@@ -104,11 +105,13 @@ function App() {
         inputRef.current.onchange = () => {
             const file = inputRef.current!.files?.[0];
             if (!file) return;
-            const url = URL.createObjectURL(file);
-            const text = `![${file.name}](${url})`
-            editor?.focus();
-            editor?.trigger('keyboard', 'type', {text: text});
-            inputRef.current!.value = '';
+            storeFile(file).then(res => {
+                const url = `IDB:${res.id}`;
+                const text = `![${file.name}](${url})`
+                editor?.focus();
+                editor?.trigger('keyboard', 'type', {text: text});
+                inputRef.current!.value = '';
+            })
         };
         inputRef.current.click();
     }, [editor]);
