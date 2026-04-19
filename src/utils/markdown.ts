@@ -95,7 +95,7 @@ function createExt(theme?:Theme) {
 
         renderer: {
             heading(token) {
-                const content = this.parser.parse(token.tokens);
+                const content = this.parser.parseInline(token.tokens);
                 const id = unescapeHTML(content).replace(/\s+/g, "-");
                 const line = (token as any).line;
                 switch (token.depth) {
