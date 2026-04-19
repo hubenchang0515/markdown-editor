@@ -115,6 +115,15 @@ export function CreateDefaultTheme(primary:Color, secondary:Color, base:Color=Sl
             border: `1px solid ${base._300}`,
             padding: `0.5em 1em`,
         },
+
+        linenumber: {
+            paddingRight: 8,
+            paddingTop: 16,
+            paddingBottom: 16,
+            margin: '4px 8px',
+            color: base._400,
+            borderRight: `1px solid ${base._300}`,
+        }
     } as Theme;
 }
 

@@ -157,9 +157,13 @@ function createExt(theme?:Theme) {
             },
 
             code(token) {
-                const highlighted = token.lang ? highlight(token.text, token.lang) : token.text;
+                const code = token.lang ? highlight(token.text, token.lang) : token.text;
                 const line = (token as any).line;
-                return `<pre class="line-${line}" style="${styleToString(theme?.pre)}"><code>${highlighted}</code></pre>`;
+                const rows = code.split('\n');
+                const width = String(rows.length).length;
+                const result = rows.map((row, i) => `<span class="line-${line + 1 + i}"><span style="user-select:none;${styleToString(theme?.linenumber)}">${String(i).padStart(width, ' ')}</span>${row}</span>\n`).join('')
+
+                return `<pre class="line-${line}" style="${styleToString(theme?.pre)}"><code>${result}</code></pre>`;
             },
 
             table(token) {

@@ -22,4 +22,6 @@ export interface Theme {
     ol?: CSSProperties;
     ul?: CSSProperties;
     li?: CSSProperties;
+
+    linenumber?: CSSProperties;
 }
