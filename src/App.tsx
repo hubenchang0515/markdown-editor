@@ -107,7 +107,7 @@ function App() {
             if (!file) return;
             storeFile(file).then(res => {
                 const url = `IDB:${res.id}`;
-                const text = `![${file.name}](${url})`
+                const text = `![${file.name}](${url})\n`
                 editor?.focus();
                 editor?.trigger('keyboard', 'type', {text: text});
                 inputRef.current!.value = '';
@@ -117,11 +117,17 @@ function App() {
     }, [editor]);
 
     // 插入二维码
-    const insertQrCode = useCallback((url:string) => {
+    const insertQrCode = useCallback((blob?:Blob|null) => {
         setOpenQrCodeDialog(false);
-        const text = `![qrcode](${url})`
-        editor?.focus();
-        editor?.trigger('keyboard', 'type', {text: text});
+        if (!blob) return;
+        const file = new File([blob], 'qrcode.png', {type:blob.type, lastModified: Date.now()});
+        storeFile(file).then(res => {
+            const url = `IDB:${res.id}`;
+            const text = `![${file.name}](${url})\n`
+            editor?.focus();
+            editor?.trigger('keyboard', 'type', {text: text});
+            inputRef.current!.value = '';
+        })
     }, [editor]);
 
     // Ctrl + S：防手欠

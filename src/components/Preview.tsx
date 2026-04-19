@@ -23,7 +23,7 @@ const Preview = forwardRef<HTMLIFrameElement, PreviewProps>((props, ref) => {
     }, [ref]);
 
     useEffect(() => {
-        iframeRef.current!.contentDocument!.body.innerHTML! = props.content ?? ALT_HTML;
+        iframeRef.current!.contentDocument!.body.innerHTML! = props.content || ALT_HTML;
         props.onUpdate?.();
     }, [props.content, props.onUpdate]);
     

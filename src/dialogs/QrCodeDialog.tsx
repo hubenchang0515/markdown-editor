@@ -5,13 +5,13 @@ import Button from "../components/Button";
 import { Blue } from "../common/Color";
 
 export interface QrCodeDialogProps extends React.DialogHTMLAttributes<HTMLDialogElement> {
-    onConfirm?: (url:string)=>void;
+    onConfirm?: (blob?:Blob|null)=>void;
     onCancel?: ()=>void;
 }
 
 const QrCodeDialog = forwardRef<HTMLDialogElement, QrCodeDialogProps>((props, ref) => {
     const [text, setText] = useState("");
-    const [url, setUrl] = useState("");
+    const [blob, setBlob] = useState<Blob|null>();
 
     // 开关窗口时清空内容
     useEffect(() => {
@@ -22,7 +22,7 @@ const QrCodeDialog = forwardRef<HTMLDialogElement, QrCodeDialogProps>((props, re
     useEffect(() => {
         QRCode.toCanvas(text||'https://xplanc.org/', (_, canvas) => {
             canvas.toBlob((blob) => {
-                setUrl(URL.createObjectURL(blob!));
+                setBlob(blob);
             })
         })
     }, [text]);
@@ -42,9 +42,9 @@ const QrCodeDialog = forwardRef<HTMLDialogElement, QrCodeDialogProps>((props, re
             >
                 <h2>插入二维码</h2>
                 {
-                    url && 
+                    blob && 
                     <img
-                        src={url}
+                        src={URL.createObjectURL(blob)}
                         style={{
                             width:256, 
                             height:256,
@@ -70,7 +70,7 @@ const QrCodeDialog = forwardRef<HTMLDialogElement, QrCodeDialogProps>((props, re
                         gap: 8,
                     }}
                 >
-                    <Button color={Blue} style={{flex:1}} onClick={()=>props.onConfirm?.(url)}>确定</Button>
+                    <Button color={Blue} style={{flex:1}} onClick={()=>props.onConfirm?.(blob)}>确定</Button>
                     <Button style={{flex:1}} onClick={props.onCancel}>取消</Button>
                 </div>
             </div>
