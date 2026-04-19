@@ -121,6 +121,27 @@ function App() {
         editor?.trigger('keyboard', 'type', {text: text});
     }, [editor]);
 
+    // Ctrl + S：防手欠
+    useEffect(() => {
+        const handleKeyDown = (event:KeyboardEvent) => {
+            const isCtrlPressed = event.ctrlKey || event.metaKey;
+            if (isCtrlPressed && event.key === 's') {
+                event.preventDefault();
+                event.stopPropagation();
+                render(raw, DefaultTheme).then(html => console.log(html));
+            }
+        };
+
+        
+        window.addEventListener('keydown', handleKeyDown);
+        iframeRef.current?.contentWindow?.addEventListener('keydown', handleKeyDown);
+        
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            iframeRef.current?.contentWindow?.removeEventListener('keydown', handleKeyDown);
+        };
+    }, []);
+
     return (
         <div
             style={{
