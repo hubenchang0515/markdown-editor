@@ -75,7 +75,6 @@ function setLineNumber(tokens:Token[], start:number=1) {
 }
 
 function createExt(theme?:Theme) {
-    let line = 1;
     const ext: MarkedExtension = {
         gfm: true,
         async: true,
