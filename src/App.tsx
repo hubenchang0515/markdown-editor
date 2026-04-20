@@ -111,7 +111,7 @@ function App() {
                 editor?.focus();
                 editor?.trigger('keyboard', 'type', {text: text});
                 inputRef.current!.value = '';
-            })
+            });
         };
         inputRef.current.click();
     }, [editor]);
@@ -128,6 +128,33 @@ function App() {
             editor?.trigger('keyboard', 'type', {text: text});
             inputRef.current!.value = '';
         })
+    }, [editor]);
+
+    // 粘贴图片
+    useEffect(() => {
+        const pasteImage = (e: ClipboardEvent) => {
+            const items = e.clipboardData?.items;
+            if (!items) return;
+            for (const item of items) {
+                if (item.type.startsWith('image/')) {
+                    e.preventDefault();
+                    const file = item.getAsFile();
+                    if (!file) continue;
+                    storeFile(file).then(res => {
+                        const url = `IDB:${res.id}`;
+                        const text = `![${file.name}](${url})\n`
+                        editor?.focus();
+                        editor?.trigger('keyboard', 'type', {text: text});
+                        inputRef.current!.value = '';
+                    })
+                }
+            }
+        }
+
+        window.addEventListener('paste', pasteImage, true);
+        return () => {
+            window.removeEventListener('paste', pasteImage);
+        }
     }, [editor]);
 
     // Ctrl + S：防手欠
