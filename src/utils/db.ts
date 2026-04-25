@@ -1,4 +1,4 @@
-const DB_NAME = 'fileDB';
+const DB_NAME = 'db-markdown-editor';
 const STORE_NAME = 'files';
 
 interface FileItem {
