@@ -143,7 +143,7 @@ function createExt(theme?:Theme) {
             link(token) {
                 const content = this.parser.parseInline(token.tokens);
                 const line = (token as any).line;
-                return `<a class="line-${line}" href="${token.href}" title="${token.title??content}" target="_blank" style="${styleToString(theme?.a)}">${content}</a>`;
+                return `<a class="line-${line}" href="${token.href}" title="${token.title??token.text}" target="_blank" style="${styleToString(theme?.a)}">${content}</a>`;
             },
 
             blockquote(token) {
