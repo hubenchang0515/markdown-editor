@@ -93,7 +93,9 @@ function createExt(theme?:Theme) {
                 const { href } = token as Tokens.Image;
                 if (href.startsWith("IDB:")) {
                     const res = await loadFile(href.slice(4));
-                    token.href = await blobToBase64(res.file);
+                    if (res) {
+                        token.href = await blobToBase64(res.file);
+                    }
                 } else {
                     token.href = await urlToBase64(href);
                 }
@@ -165,11 +167,7 @@ function createExt(theme?:Theme) {
             code(token) {
                 const code = token.lang ? highlight(token.text, token.lang) : token.text;
                 const line = (token as any).line;
-                const rows = code.split('\n');
-                const width = String(rows.length).length;
-                const result = rows.map((row, i) => `<span class="line-${line + 1 + i}"><span style="user-select:none;${styleToString(theme?.linenumber)}">${String(i).padStart(width, ' ')}</span>${row}</span>\n`).join('')
-
-                return `<pre class="line-${line}" style="${styleToString(theme?.pre)}"><code>${result}</code></pre>`;
+                return `<pre class="line-${line}" style="${styleToString(theme?.pre)}"><code>${code}</code></pre>`;
             },
 
             table(token) {
