@@ -164,7 +164,7 @@ function App() {
             if (isCtrlPressed && event.key === 's') {
                 event.preventDefault();
                 event.stopPropagation();
-                render(raw, DefaultTheme).then(html => console.log(html));
+                render(raw, DefaultTheme).then(html => setHtml(html));
             }
         };
 
@@ -176,7 +176,7 @@ function App() {
             window.removeEventListener('keydown', handleKeyDown);
             iframeRef.current?.contentWindow?.removeEventListener('keydown', handleKeyDown);
         };
-    }, []);
+    }, [raw]);
 
     return (
         <div
