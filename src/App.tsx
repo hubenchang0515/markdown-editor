@@ -45,7 +45,7 @@ function App() {
     const copy = useCallback(() => {
         navigator.clipboard.write([
             new ClipboardItem({
-                'text/plain': new Blob([raw], {type: 'text/plain'}),
+                'text/plain': new Blob([html], {type: 'text/plain'}),
                 'text/html': new Blob([html], {type: 'text/html'})
             })
         ]);
