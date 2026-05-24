@@ -109,11 +109,11 @@ function createExt(theme?:Theme) {
                 const line = (token as any).line;
                 switch (token.depth) {
                     case 1: return `<h1 id=${id} class="line-${line}" style="${styleToString(theme?.h1)}">${content}</h1>`;
-                    case 2: return `<h1 id=${id} class="line-${line}" style="${styleToString(theme?.h2)}">${content}</h2>`;
-                    case 3: return `<h1 id=${id} class="line-${line}" style="${styleToString(theme?.h3)}">${content}</h3>`;
-                    case 4: return `<h1 id=${id} class="line-${line}" style="${styleToString(theme?.h4)}">${content}</h4>`;
-                    case 5: return `<h1 id=${id} class="line-${line}" style="${styleToString(theme?.h5)}">${content}</h5>`;
-                    case 6: return `<h1 id=${id} class="line-${line}" style="${styleToString(theme?.h6)}">${content}</h6>`;
+                    case 2: return `<h2 id=${id} class="line-${line}" style="${styleToString(theme?.h2)}">${content}</h2>`;
+                    case 3: return `<h3 id=${id} class="line-${line}" style="${styleToString(theme?.h3)}">${content}</h3>`;
+                    case 4: return `<h4 id=${id} class="line-${line}" style="${styleToString(theme?.h4)}">${content}</h4>`;
+                    case 5: return `<h5 id=${id} class="line-${line}" style="${styleToString(theme?.h5)}">${content}</h5>`;
+                    case 6: return `<h6 id=${id} class="line-${line}" style="${styleToString(theme?.h6)}">${content}</h6>`;
                 }
                 return `<h${token.depth} id=${id} class="line-${line}">${content}</h${token.depth}>`;
             },
