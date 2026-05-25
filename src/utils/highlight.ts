@@ -1,6 +1,20 @@
 import hljs from "highlight.js";
 import { Blue, Emerald, Green, Orange, Pink, Slate, Violet } from "../common/Color";
-import { getOutLink } from "./outlink";
+import { getOutLink, getSymbols } from "./outlink";
+
+
+function addSymbols(language:string, symbols?:string[]) {
+    (hljs.getLanguage(language)!.keywords as any).built_in = [
+        ...new Set([
+            ...((hljs.getLanguage('bash')!.keywords as any).built_in),
+            ...(symbols ?? getSymbols(language)!)
+        ])
+    ]
+}
+
+addSymbols('bash')
+addSymbols('python')
+addSymbols('lua')
 
 const STYLES = {
     // 语法单元

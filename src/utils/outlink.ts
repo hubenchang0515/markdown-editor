@@ -15,8 +15,7 @@ const BASH_SYMBOLS = [
 ].map(i=>[i[0], decodeURIComponent(i[1])]);
 
 
-
-function getSymbols(language:string) {
+export function getItems(language:string) {
     switch (language.toLocaleLowerCase()) {
         case 'python': return PYTHON_SYMBOLS;
         case 'lua': return LUA_SYMBOLS;
@@ -24,6 +23,10 @@ function getSymbols(language:string) {
         case 'shell':
         case 'bash': return BASH_SYMBOLS;
     }
+}
+
+export function getSymbols(language:string) {
+    return getItems(language)?.map((item) => item[1])
 }
 
 export function inferLanguage(text:string) {
@@ -41,6 +44,6 @@ export function inferLanguage(text:string) {
 }
 
 export function getOutLink(text:string, language:string) {
-    const symbols = getSymbols(language);
+    const symbols = getItems(language);
     return symbols?.find(s => s[1] === text)?.[0];
 }
