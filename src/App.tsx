@@ -8,6 +8,20 @@ import Button from "./components/Button";
 import debounce from "./utils/debounce";
 import QrCodeDialog from "./dialogs/QrCodeDialog";
 import { storeFile } from "./utils/db";
+import EmptyTheme from "./themes/EmptyTheme";
+import type { Theme } from "./common/Theme";
+import Select from "./components/Select";
+
+const THEME_OPTIONS = [
+    {
+        text: '空样式',
+        theme: EmptyTheme
+    },
+    {
+        text: '默认样式',
+        theme: DefaultTheme
+    }
+]
 
 function App() {
     const inputRef = useRef<HTMLInputElement>(null);
@@ -19,14 +33,15 @@ function App() {
     const [html, setHtml] = useState("");
     const [editor, setEditor] = useState<EditorInstance|null>(null);
     const [openQrCodeDialog, setOpenQrCodeDialog] = useState(false);
+    const [theme, setTheme] = useState(1);
 
     // 消抖
     const update = useCallback(debounce(setRaw, 10), [setRaw]);
 
     // 渲染
     useEffect(() => {
-        render(raw, DefaultTheme).then(html => setHtml(html));
-    }, [raw]);
+        render(raw, THEME_OPTIONS[theme].theme).then(html => setHtml(html));
+    }, [raw, theme]);
 
     // 预览界面自动滚动
     const scrollToLine = useCallback((line:number) => {
@@ -164,7 +179,7 @@ function App() {
             if (isCtrlPressed && event.key === 's') {
                 event.preventDefault();
                 event.stopPropagation();
-                render(raw, DefaultTheme).then(html => setHtml(html));
+                render(raw, THEME_OPTIONS[theme].theme).then(html => setHtml(html));
             }
         };
 
@@ -216,6 +231,7 @@ function App() {
                     <Button color={Sky} onClick={()=>{iframeRef.current?.contentWindow?.print()}}>打印</Button>
                 </div>
                 <span style={{flex:1}}/>
+                <Select value={theme} options={THEME_OPTIONS} onSelect={(i) => setTheme(i)}/>
             </nav> 
             <main
                 ref={containerRef}
