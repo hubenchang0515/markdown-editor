@@ -156,13 +156,13 @@ function createExt(theme?:Theme) {
 
             codespan(token) {
                 const line = (token as any).line;
-                return `<code class="line-${line}" style="${styleToString(theme?.code)}">${highlight(token.text, 'text')}</code>`
+                return `<code class="line-${line}" style="${styleToString(theme?.code)}">${escapeHTML(token.text)}</code>`
             },
 
             code(token) {
                 const code = token.lang ? highlight(token.text, token.lang) : token.text;
                 const line = (token as any).line;
-                return `<pre class="line-${line}" style="${styleToString(theme?.pre)}"><code>${code}</code></pre>`;
+                return `<pre class="line-${line} highlight ${token.lang}" style="${styleToString(theme?.pre)}"><code>${code}</code></pre>`;
             },
 
             table(token) {
