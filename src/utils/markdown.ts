@@ -4,16 +4,10 @@ import type { Theme } from "../common/Theme";
 import { highlight } from "./highlight";
 import { loadFile } from "./db";
 
-// function escapeHTML(text:string) {
-//     const div = document.createElement('div');
-//     div.textContent = text;
-//     return div.innerHTML;
-// }
-
-function unescapeHTML(text:string) {
+function escapeHTML(text:string) {
     const div = document.createElement('div');
-    div.innerHTML = text;
-    return div.textContent??"";
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 function blobToBase64(file:Blob): Promise<string> {
@@ -105,7 +99,8 @@ function createExt(theme?:Theme) {
         renderer: {
             heading(token) {
                 const content = this.parser.parseInline(token.tokens);
-                const id = unescapeHTML(content).replace(/\s+/g, "-");
+                const id = escapeHTML(content).replace(/\s+/g, "-");
+                console.log(id)
                 const line = (token as any).line;
                 switch (token.depth) {
                     case 1: return `<h1 id=${id} class="line-${line}" style="${styleToString(theme?.h1)}">${content}</h1>`;
