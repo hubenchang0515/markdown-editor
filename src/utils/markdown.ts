@@ -160,7 +160,6 @@ function createExt(theme?:Theme) {
             },
 
             codespan(token) {
-                console.log(token)
                 const line = (token as any).line;
                 return `<code class="line-${line}" style="${styleToString(theme?.code)}">${token.text}</code>`
             },
