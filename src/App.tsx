@@ -34,6 +34,7 @@ function App() {
     const [editor, setEditor] = useState<EditorInstance|null>(null);
     const [openQrCodeDialog, setOpenQrCodeDialog] = useState(false);
     const [theme, setTheme] = useState(1);
+    const [readonly, setReadonly] = useState(false);
 
     // 消抖
     const update = useCallback(debounce(setRaw, 10), [setRaw]);
@@ -193,6 +194,21 @@ function App() {
         };
     }, [raw]);
 
+    // 初始化
+    useEffect(() => {
+        let paramsString = ""
+        if (window.location.hash) {
+            paramsString = window.location.hash.substring(1)
+        } else if (window.location.search) {
+            paramsString = window.location.search;
+        }
+
+        const params = new URLSearchParams(paramsString);
+        const base64md = params.get("content") ?? '';
+        setReadonly(!!base64md);
+        setRaw(decodeURIComponent(atob(base64md)))
+    }, []);
+
     return (
         <div
             style={{
@@ -222,7 +238,7 @@ function App() {
                     <Button onClick={openFile}>打开</Button>
                     <Button onClick={saveFile}>保存</Button>
                 </div>
-                <div>
+                <div style={{display:readonly?'none':'block'}}>
                     <Button color={Emerald} onClick={insertImage}>图片</Button>
                     <Button color={Emerald} onClick={()=>setOpenQrCodeDialog(true)}>二维码</Button>
                 </div>
@@ -256,7 +272,8 @@ function App() {
                         minWidth: 0,
                         minHeight: 0,
                         border: `1px solid ${Slate._200}`,
-                        maxWidth: '210mm'
+                        maxWidth: '210mm',
+                        display: readonly ? 'none' : 'block'
                     }}
                     onInit={(instance) => setEditor(instance)}
                     onEdit={(text) => update(text)}
@@ -274,7 +291,7 @@ function App() {
                         overflow:'auto', 
                         border: `1px solid ${Slate._200}`,
                         overflowX:'hidden',
-                        maxWidth: '210mm'
+                        maxWidth: readonly ? 'none' : '210mm'
                     }} 
                     content={html}
                     onUpdate={() => scrollToLine(editor?.getPosition()?.lineNumber??0)}

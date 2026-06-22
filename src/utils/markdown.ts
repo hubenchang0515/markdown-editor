@@ -100,7 +100,6 @@ function createExt(theme?:Theme) {
             heading(token) {
                 const content = this.parser.parseInline(token.tokens);
                 const id = escapeHTML(content).replace(/\s+/g, "-");
-                console.log(id)
                 const line = (token as any).line;
                 switch (token.depth) {
                     case 1: return `<h1 id=${id} class="line-${line}" style="${styleToString(theme?.h1)}">${content}</h1>`;
