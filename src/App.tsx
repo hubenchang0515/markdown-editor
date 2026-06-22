@@ -34,7 +34,7 @@ function App() {
     const [editor, setEditor] = useState<EditorInstance|null>(null);
     const [openQrCodeDialog, setOpenQrCodeDialog] = useState(false);
     const [theme, setTheme] = useState(1);
-    const [readonly, setReadonly] = useState(false);
+    const [readonly, setReadonly] = useState(true);
 
     // 消抖
     const update = useCallback(debounce(setRaw, 10), [setRaw]);
@@ -205,8 +205,12 @@ function App() {
 
         const params = new URLSearchParams(paramsString);
         const base64md = params.get("content") ?? '';
-        setReadonly(!!base64md);
-        setRaw(decodeURIComponent(atob(base64md)))
+        if (base64md) {
+            setReadonly(true);
+            setRaw(decodeURIComponent(atob(base64md)));
+        } else {
+            setReadonly(false);
+        }
     }, []);
 
     return (
@@ -234,7 +238,7 @@ function App() {
             >
                 <input ref={inputRef} type="file" style={{display:'none'}}/>
                 <QrCodeDialog open={openQrCodeDialog} onConfirm={insertQrCode} onCancel={()=>setOpenQrCodeDialog(false)}/>
-                <div>
+                <div style={{display:readonly?'none':'block'}}>
                     <Button onClick={openFile}>打开</Button>
                     <Button onClick={saveFile}>保存</Button>
                 </div>
@@ -263,22 +267,26 @@ function App() {
                     margin:'auto'
                 }}
             >
-                <Editor
-                    id="editor"
-                    ref={editorRef}
-                    className="no-print" 
-                    style={{
-                        flex:1, 
-                        minWidth: 0,
-                        minHeight: 0,
-                        border: `1px solid ${Slate._200}`,
-                        maxWidth: '210mm',
-                        display: readonly ? 'none' : 'block'
-                    }}
-                    onInit={(instance) => setEditor(instance)}
-                    onEdit={(text) => update(text)}
-                    onMove={scrollToLine}
-                />
+                {
+                    readonly ? <></> :
+                    <Editor
+                        id="editor"
+                        ref={editorRef}
+                        className="no-print" 
+                        style={{
+                            flex:1, 
+                            minWidth: 0,
+                            minHeight: 0,
+                            border: `1px solid ${Slate._200}`,
+                            maxWidth: '210mm',
+                            display: readonly ? 'none' : 'block'
+                        }}
+                        onInit={(instance) => setEditor(instance)}
+                        onEdit={(text) => update(text)}
+                        onMove={scrollToLine}
+                    />
+                }
+                
                 <Preview
                     id="preview"
                     ref={iframeRef}

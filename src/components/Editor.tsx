@@ -26,6 +26,7 @@ const Editor = forwardRef<HTMLDivElement, EditorProps>((props, ref) => {
 
     // 初始化
     useEffect(() => {
+        console.log('初始化')
         // 创建编辑器
         editorRef.current!.innerHTML = "";
         const editor = monaco.editor.create(editorRef.current!, {
