@@ -216,7 +216,8 @@ function App() {
     return (
         <div
             style={{
-                height:'100%', 
+                height: readonly ? 'auto' : '100%', 
+                minHeight:'100%',
                 width:'100%', 
                 display:'flex', 
                 flexDirection:'column', 
@@ -261,7 +262,7 @@ function App() {
                     display:'flex', 
                     flexDirection: width > 960 ? 'row' : 'column',
                     gap:8, 
-                    overflow:'hidden',
+                    overflow: readonly ? 'visible' : 'hidden',
                     width:'100%',
                     maxWidth:'calc(420mm + 8px)',
                     margin:'auto'
@@ -291,12 +292,15 @@ function App() {
                     id="preview"
                     ref={iframeRef}
                     className="print-root" 
+                    autoHeight={readonly}
                     style={{
-                        flex:1, 
+                        flex: readonly ? 'none' : 1, 
+                        width: readonly ? '100%' : undefined,
+                        boxSizing: 'border-box',
                         minWidth: 0,
                         minHeight: 0,
                         background:'#fff', 
-                        overflow:'auto', 
+                        overflow: readonly ? 'visible' : 'auto', 
                         border: `1px solid ${Slate._200}`,
                         overflowX:'hidden',
                         maxWidth: readonly ? 'none' : '210mm'
