@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { render } from "./utils/markdown";
-import DefaultTheme from "./themes/DefaultTheme";
-import { Emerald, Sky, Slate } from "./common/Color";
+import { CreateDefaultTheme } from "./themes/DefaultTheme";
+import { Emerald, PALETTE, Sky, Slate } from "./common/Color";
 import Editor, {type EditorInstance} from "./components/Editor";
 import Preview from "./components/Preview";
 import Button from "./components/Button";
@@ -11,17 +11,26 @@ import { storeFile } from "./utils/db";
 import EmptyTheme from "./themes/EmptyTheme";
 import type { Theme } from "./common/Theme";
 import Select from "./components/Select";
+import ColorPicker from "./components/ColorPicker";
 
-const THEME_OPTIONS = [
+type ThemeId = 'empty' | 'default';
+
+const THEME_OPTIONS: {text:string, value:ThemeId}[] = [
     {
         text: '空样式',
-        theme: EmptyTheme
+        value: 'empty'
     },
     {
         text: '默认样式',
-        theme: DefaultTheme
+        value: 'default'
     }
 ]
+
+const DEFAULT_COLORS = {
+    primary: 'Green',
+    secondary: 'Pink',
+    base: 'Slate'
+}
 
 function App() {
     const inputRef = useRef<HTMLInputElement>(null);
@@ -33,16 +42,29 @@ function App() {
     const [html, setHtml] = useState("");
     const [editor, setEditor] = useState<EditorInstance|null>(null);
     const [openQrCodeDialog, setOpenQrCodeDialog] = useState(false);
-    const [theme, setTheme] = useState(1);
+    const [theme, setTheme] = useState<ThemeId>('default');
+    const [primaryColor, setPrimaryColor] = useState(DEFAULT_COLORS.primary);
+    const [secondaryColor, setSecondaryColor] = useState(DEFAULT_COLORS.secondary);
+    const [baseColor, setBaseColor] = useState(DEFAULT_COLORS.base);
     const [readonly, setReadonly] = useState(true);
+
+    // 根据当前配色生成样式
+    const currentTheme = useMemo<Theme>(() => {
+        if (theme === 'empty') return EmptyTheme;
+        return CreateDefaultTheme(
+            PALETTE[primaryColor],
+            PALETTE[secondaryColor],
+            PALETTE[baseColor]
+        );
+    }, [theme, primaryColor, secondaryColor, baseColor]);
 
     // 消抖
     const update = useCallback(debounce(setRaw, 10), [setRaw]);
 
     // 渲染
     useEffect(() => {
-        render(raw, THEME_OPTIONS[theme].theme).then(html => setHtml(html));
-    }, [raw, theme]);
+        render(raw, currentTheme).then(html => setHtml(html));
+    }, [raw, currentTheme]);
 
     // 预览界面自动滚动
     const scrollToLine = useCallback((line:number) => {
@@ -180,7 +202,7 @@ function App() {
             if (isCtrlPressed && event.key === 's') {
                 event.preventDefault();
                 event.stopPropagation();
-                render(raw, THEME_OPTIONS[theme].theme).then(html => setHtml(html));
+                render(raw, currentTheme).then(html => setHtml(html));
             }
         };
 
@@ -192,7 +214,7 @@ function App() {
             window.removeEventListener('keydown', handleKeyDown);
             iframeRef.current?.contentWindow?.removeEventListener('keydown', handleKeyDown);
         };
-    }, [raw]);
+    }, [raw, currentTheme]);
 
     // 初始化
     useEffect(() => {
@@ -231,6 +253,8 @@ function App() {
                 className="no-print" 
                 style={{
                     display:'flex', 
+                    flexWrap:'wrap',
+                    alignItems:'center',
                     gap:6,
                     width:'100%',
                     maxWidth:'calc(420mm + 8px)',
@@ -252,7 +276,25 @@ function App() {
                     <Button color={Sky} onClick={()=>{iframeRef.current?.contentWindow?.print()}}>打印</Button>
                 </div>
                 <span style={{flex:1}}/>
-                <Select value={theme} options={THEME_OPTIONS} onSelect={(i) => setTheme(i)}/>
+                {
+                    theme === 'default' &&
+                    <div style={{display:'flex', alignItems:'center', gap:4}}>
+                        <ColorPicker label="主色" value={primaryColor} onChange={setPrimaryColor}/>
+                        <ColorPicker label="辅色" value={secondaryColor} onChange={setSecondaryColor}/>
+                        <ColorPicker label="基础色" value={baseColor} onChange={setBaseColor}/>
+                        <Button
+                            title="恢复默认配色"
+                            onClick={() => {
+                                setPrimaryColor(DEFAULT_COLORS.primary);
+                                setSecondaryColor(DEFAULT_COLORS.secondary);
+                                setBaseColor(DEFAULT_COLORS.base);
+                            }}
+                        >
+                            重置
+                        </Button>
+                    </div>
+                }
+                <Select value={theme} options={THEME_OPTIONS} onSelect={(value) => setTheme(value as ThemeId)}/>
             </nav> 
             <main
                 ref={containerRef}
