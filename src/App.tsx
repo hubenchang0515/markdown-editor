@@ -347,7 +347,7 @@ function App() {
                         border: `1px solid ${Slate._200}`,
                         overflowX:'hidden',
                         // 限制预览宽度，保持阅读行宽（不再依赖主题的页面级样式）
-                        maxWidth: '210mm',
+                        maxWidth: readonly ? '' : '210mm',
                         // 四周留出一点间距，避免内容贴边
                         margin: readonly ? 'auto' : '0',
                         padding: '8px'
