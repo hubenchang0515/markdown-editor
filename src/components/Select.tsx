@@ -22,6 +22,9 @@ export default function Select(props:SelectProps) {
                 backgroundColor: Slate._500,
                 padding: '2px 4px',
                 border: `1px solid ${Slate._500}`,
+                // 与普通按钮保持一致的高度
+                height: 25,
+                boxSizing: 'border-box',
                 margin: 0,
                 userSelect: 'none',
                 cursor: 'pointer',

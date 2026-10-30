@@ -275,13 +275,15 @@ function App() {
                     <Button color={Sky} onClick={copy}>复制</Button>
                     <Button color={Sky} onClick={()=>{iframeRef.current?.contentWindow?.print()}}>打印</Button>
                 </div>
-                <span style={{flex:1}}/>
+                <div style={{display:'flex', marginLeft:'auto'}}>
+                    <Select value={theme} options={THEME_OPTIONS} onSelect={(value) => setTheme(value)}/>
+                </div>
                 {
                     theme !== 'empty' &&
-                    <div style={{display:'flex', alignItems:'center', gap:4}}>
+                    <>
                         <ColorPicker label="主色" value={primaryColor} onChange={setPrimaryColor}/>
                         <ColorPicker label="辅色" value={secondaryColor} onChange={setSecondaryColor}/>
-                        <ColorPicker label="基础色" value={baseColor} onChange={setBaseColor}/>
+                        <ColorPicker label="基色" value={baseColor} onChange={setBaseColor}/>
                         <Button
                             title="恢复默认配色"
                             onClick={() => {
@@ -292,9 +294,8 @@ function App() {
                         >
                             重置
                         </Button>
-                    </div>
+                    </>
                 }
-                <Select value={theme} options={THEME_OPTIONS} onSelect={(value) => setTheme(value)}/>
             </nav> 
             <main
                 ref={containerRef}
@@ -340,7 +341,7 @@ function App() {
                         width: readonly ? '100%' : undefined,
                         boxSizing: 'border-box',
                         minWidth: 0,
-                        minHeight: 0,
+                        minHeight: '100%',
                         background:'#fff', 
                         overflow: readonly ? 'visible' : 'auto', 
                         border: `1px solid ${Slate._200}`,

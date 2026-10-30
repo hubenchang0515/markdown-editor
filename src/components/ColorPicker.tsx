@@ -75,8 +75,9 @@ export default function ColorPicker(props: ColorPickerProps) {
                 onClick={toggle}
                 css={css({
                     display: 'flex',
+                    flexShrink: 0,
                     alignItems: 'center',
-                    gap: 4,
+                    gap: 3,
                     padding: '2px 4px',
                     color: Slate._50,
                     backgroundColor: Slate._500,
@@ -84,6 +85,7 @@ export default function ColorPicker(props: ColorPickerProps) {
                     cursor: 'pointer',
                     outline: 'none',
                     userSelect: 'none',
+                    whiteSpace: 'nowrap',
 
                     "&:hover": {
                         backgroundColor: Slate._400,
@@ -95,7 +97,8 @@ export default function ColorPicker(props: ColorPickerProps) {
                 <span
                     style={{
                         display: 'flex',
-                        width: 56,
+                        flex: '0 0 32px',
+                        width: 32,
                         height: 12,
                         borderRadius: 2,
                         overflow: 'hidden',
@@ -105,7 +108,6 @@ export default function ColorPicker(props: ColorPickerProps) {
                         <span key={shade} style={{ flex: 1, background: color[shade] }}/>
                     ))}
                 </span>
-                <span style={{ fontSize: 12 }}>{props.value}</span>
                 <span style={{ fontSize: 10, opacity: 0.8 }}>▾</span>
             </button>
             {
