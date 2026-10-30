@@ -3,6 +3,7 @@ import { Slate } from "../common/Color";
 
 export interface PreviewProps extends React.IframeHTMLAttributes<HTMLIFrameElement> {
     content?: string;
+    background?: string;
     onUpdate?: ()=>void;
     autoHeight?: boolean;
 }
@@ -49,6 +50,8 @@ const Preview = forwardRef<HTMLIFrameElement, PreviewProps>((props, ref) => {
 
     useEffect(() => {
         const doc = iframeRef.current!.contentDocument!;
+        doc.body.style.margin = '0';
+        doc.body.style.background = props.background ?? '';
         doc.body.innerHTML = `<div id="${CONTENT_ID}">${props.content || ALT_HTML}</div>`;
 
         observerRef.current?.disconnect();
@@ -64,7 +67,7 @@ const Preview = forwardRef<HTMLIFrameElement, PreviewProps>((props, ref) => {
         }
 
         props.onUpdate?.();
-    }, [props.content, props.onUpdate, props.autoHeight, resize]);
+    }, [props.content, props.background, props.onUpdate, props.autoHeight, resize]);
 
     // 窗口尺寸变化时重新计算高度
     useEffect(() => {
@@ -78,7 +81,7 @@ const Preview = forwardRef<HTMLIFrameElement, PreviewProps>((props, ref) => {
         };
     }, [props.autoHeight, resize]);
 
-    const {content, onUpdate, autoHeight, ...rawProps} = props;
+    const {content, background, onUpdate, autoHeight, ...rawProps} = props;
     return (
         <iframe
             ref={setRef}

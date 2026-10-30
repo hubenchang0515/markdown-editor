@@ -41,8 +41,15 @@ function styleToString(style?: CSSProperties): string {
         const cssKey = key.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`);
 
         // 数字自动加 px（CSS 特例）
-        const cssValue =
-            typeof value === "number" ? `${value}px` : value;
+        const rawValue =
+            typeof value === "number" ? `${value}px` : String(value);
+
+        // 转义后写入 style="..." 属性，避免字体名等双引号截断属性
+        const cssValue = rawValue
+            .replace(/&/g, "&amp;")
+            .replace(/"/g, "&quot;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
 
         return `${cssKey}: ${cssValue};`;
         })
@@ -192,6 +199,11 @@ function createExt(theme?:Theme) {
                 } else {
                     return `<li class="line-${line}" style="${styleToString(theme?.li)}">${content}</li>`
                 }
+            },
+
+            hr(token) {
+                const line = (token as any).line;
+                return `<hr class="line-${line}" style="${styleToString(theme?.hr)}"/>`;
             }
         }
     }
@@ -202,5 +214,5 @@ function createExt(theme?:Theme) {
 export async function render(markdown:string, theme?:Theme) {
     const marked = new Marked();
     marked.use(createExt(theme));
-    return marked.parse(markdown, {async:true});
+    return await marked.parse(markdown, {async:true});
 }

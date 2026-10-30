@@ -36,13 +36,13 @@ const STYLES = {
     "hljs-attribute": `color:${Pink._500};`,
 };
 
-function walk(node: Node, language:string) {
+function walk(node: Node, language:string, styles:Record<string,string>) {
     if (!(node instanceof HTMLElement)) return;
 
     const element = node as HTMLElement;
     element.classList.forEach(c => {
-        if (c in STYLES) {
-            element.style.cssText += STYLES[c as keyof typeof STYLES]
+        if (c in styles) {
+            element.style.cssText += styles[c]
         }
     });
 
@@ -55,7 +55,7 @@ function walk(node: Node, language:string) {
         return;
     }
 
-    node.childNodes.forEach(n => walk(n, language));
+    node.childNodes.forEach(n => walk(n, language, styles));
 }
 
 export function highlight(code:string, language:string) {
@@ -66,7 +66,7 @@ export function highlight(code:string, language:string) {
         html = hljs.highlight(code, {language: key, ignoreIllegals:true}).value;
         const div = document.createElement('div');
         div.innerHTML = html;
-        walk(div, key);
+        walk(div, key, STYLES);
         html = div.innerHTML;
     }
     return html;

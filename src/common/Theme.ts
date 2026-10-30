@@ -1,5 +1,9 @@
 import type { CSSProperties } from "react";
 
+/**
+ * 样式定义：所有样式都直接作用在对应标签的内联 style 上，
+ * 不包含页面级（外层容器）样式。
+ */
 export interface Theme {
     h1?: CSSProperties;
     h2?: CSSProperties;
@@ -22,6 +26,7 @@ export interface Theme {
     ol?: CSSProperties;
     ul?: CSSProperties;
     li?: CSSProperties;
+    hr?: CSSProperties;
 
     linenumber?: CSSProperties;
 }

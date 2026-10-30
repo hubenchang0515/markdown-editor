@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { render } from "./utils/markdown";
-import { CreateDefaultTheme } from "./themes/DefaultTheme";
 import { Emerald, PALETTE, Sky, Slate } from "./common/Color";
 import Editor, {type EditorInstance} from "./components/Editor";
 import Preview from "./components/Preview";
@@ -8,29 +7,15 @@ import Button from "./components/Button";
 import debounce from "./utils/debounce";
 import QrCodeDialog from "./dialogs/QrCodeDialog";
 import { storeFile } from "./utils/db";
-import EmptyTheme from "./themes/EmptyTheme";
 import type { Theme } from "./common/Theme";
 import Select from "./components/Select";
 import ColorPicker from "./components/ColorPicker";
+import { DEFAULT_COLORS, THEME_PRESETS } from "./themes";
 
-type ThemeId = 'empty' | 'default';
-
-const THEME_OPTIONS: {text:string, value:ThemeId}[] = [
-    {
-        text: '空样式',
-        value: 'empty'
-    },
-    {
-        text: '默认样式',
-        value: 'default'
-    }
-]
-
-const DEFAULT_COLORS = {
-    primary: 'Green',
-    secondary: 'Pink',
-    base: 'Slate'
-}
+const THEME_OPTIONS = THEME_PRESETS.map((preset) => ({
+    text: preset.name,
+    value: preset.id
+}));
 
 function App() {
     const inputRef = useRef<HTMLInputElement>(null);
@@ -42,16 +27,16 @@ function App() {
     const [html, setHtml] = useState("");
     const [editor, setEditor] = useState<EditorInstance|null>(null);
     const [openQrCodeDialog, setOpenQrCodeDialog] = useState(false);
-    const [theme, setTheme] = useState<ThemeId>('default');
+    const [theme, setTheme] = useState('default');
     const [primaryColor, setPrimaryColor] = useState(DEFAULT_COLORS.primary);
     const [secondaryColor, setSecondaryColor] = useState(DEFAULT_COLORS.secondary);
     const [baseColor, setBaseColor] = useState(DEFAULT_COLORS.base);
     const [readonly, setReadonly] = useState(true);
 
-    // 根据当前配色生成样式
+    // 根据当前样式和配色生成主题
     const currentTheme = useMemo<Theme>(() => {
-        if (theme === 'empty') return EmptyTheme;
-        return CreateDefaultTheme(
+        const preset = THEME_PRESETS.find((item) => item.id === theme) ?? THEME_PRESETS[0];
+        return preset.create(
             PALETTE[primaryColor],
             PALETTE[secondaryColor],
             PALETTE[baseColor]
@@ -233,6 +218,21 @@ function App() {
         } else {
             setReadonly(false);
         }
+
+        // 支持通过链接分享样式与配色
+        const themeId = params.get("theme");
+        if (themeId && THEME_PRESETS.some((preset) => preset.id === themeId)) {
+            setTheme(themeId);
+        }
+
+        const primary = params.get("primary");
+        if (primary && PALETTE[primary]) setPrimaryColor(primary);
+
+        const secondary = params.get("secondary");
+        if (secondary && PALETTE[secondary]) setSecondaryColor(secondary);
+
+        const base = params.get("base");
+        if (base && PALETTE[base]) setBaseColor(base);
     }, []);
 
     return (
@@ -277,7 +277,7 @@ function App() {
                 </div>
                 <span style={{flex:1}}/>
                 {
-                    theme === 'default' &&
+                    theme !== 'empty' &&
                     <div style={{display:'flex', alignItems:'center', gap:4}}>
                         <ColorPicker label="主色" value={primaryColor} onChange={setPrimaryColor}/>
                         <ColorPicker label="辅色" value={secondaryColor} onChange={setSecondaryColor}/>
@@ -294,7 +294,7 @@ function App() {
                         </Button>
                     </div>
                 }
-                <Select value={theme} options={THEME_OPTIONS} onSelect={(value) => setTheme(value as ThemeId)}/>
+                <Select value={theme} options={THEME_OPTIONS} onSelect={(value) => setTheme(value)}/>
             </nav> 
             <main
                 ref={containerRef}
@@ -345,7 +345,11 @@ function App() {
                         overflow: readonly ? 'visible' : 'auto', 
                         border: `1px solid ${Slate._200}`,
                         overflowX:'hidden',
-                        maxWidth: readonly ? 'none' : '210mm'
+                        // 限制预览宽度，保持阅读行宽（不再依赖主题的页面级样式）
+                        maxWidth: '210mm',
+                        // 四周留出一点间距，避免内容贴边
+                        margin: readonly ? 'auto' : '0',
+                        padding: '8px'
                     }} 
                     content={html}
                     onUpdate={() => scrollToLine(editor?.getPosition()?.lineNumber??0)}
