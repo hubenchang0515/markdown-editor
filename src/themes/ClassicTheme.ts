@@ -85,7 +85,7 @@ export function CreateClassicTheme(primary: Color, secondary: Color, base: Color
         img: {
             maxWidth: "100%",
             boxSizing: "content-box",
-            background: "#ffffff",
+            background: base._100,
         },
 
         blockquote: {
@@ -115,7 +115,7 @@ export function CreateClassicTheme(primary: Color, secondary: Color, base: Color
             ...text,
             margin: "0 0 16px",
             padding: 16,
-            background: base._50,
+            background: base._100,
             border: `1px solid ${base._200}`,
             borderRadius: 6,
             overflow: "auto",
@@ -135,7 +135,7 @@ export function CreateClassicTheme(primary: Color, secondary: Color, base: Color
             padding: "6px 13px",
             fontWeight: "600",
             textAlign: "left",
-            background: base._50,
+            background: base._100,
             border: `1px solid ${base._300}`,
         },
 

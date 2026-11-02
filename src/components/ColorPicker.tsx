@@ -1,17 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { css } from "@emotion/react";
-import { PALETTE, Slate, type Color } from "../common/Color";
+import { PALETTE, SHADES, Slate } from "../common/Color";
 
 export interface ColorPickerProps {
     label: string;
     value: string;
     onChange: (value: string) => void;
+    dark?: boolean;
 }
-
-const SHADES: (keyof Color)[] = [
-    "_50", "_100", "_200", "_300", "_400", "_500",
-    "_600", "_700", "_800", "_900", "_950",
-];
 
 export default function ColorPicker(props: ColorPickerProps) {
     const [open, setOpen] = useState(false);
@@ -19,6 +15,9 @@ export default function ColorPicker(props: ColorPickerProps) {
     const buttonRef = useRef<HTMLButtonElement>(null);
     const [panel, setPanel] = useState({ top: 0, left: 0, width: 320, maxHeight: 360 });
     const color = PALETTE[props.value] ?? Slate;
+    const panelColors = props.dark
+        ? { background: Slate._900, border: Slate._700, text: Slate._300, highlight: Slate._800 }
+        : { background: '#fff', border: Slate._300, text: Slate._700, highlight: Slate._100 };
 
     // 根据按钮位置计算面板位置，避免超出窗口
     const toggle = () => {
@@ -124,8 +123,8 @@ export default function ColorPicker(props: ColorPickerProps) {
                         maxHeight: panel.maxHeight,
                         overflowY: 'auto',
                         padding: 4,
-                        backgroundColor: '#fff',
-                        border: `1px solid ${Slate._300}`,
+                        backgroundColor: panelColors.background,
+                        border: `1px solid ${panelColors.border}`,
                         borderRadius: 4,
                         boxShadow: '0 8px 24px -6px rgba(0, 0, 0, 0.25)',
                     })}
@@ -152,14 +151,14 @@ export default function ColorPicker(props: ColorPickerProps) {
                                         padding: '3px 4px',
                                         border: 'none',
                                         borderRadius: 2,
-                                        background: selected ? Slate._100 : 'transparent',
+                                        background: selected ? panelColors.highlight : 'transparent',
                                         outline: selected ? `2px solid ${Slate._500}` : 'none',
                                         outlineOffset: -2,
                                         cursor: 'pointer',
                                         textAlign: 'left',
 
                                         "&:hover": {
-                                            background: Slate._100,
+                                            background: panelColors.highlight,
                                         },
                                     })}
                                 >
@@ -167,7 +166,7 @@ export default function ColorPicker(props: ColorPickerProps) {
                                         style={{
                                             flex: '0 0 52px',
                                             fontSize: 12,
-                                            color: Slate._700,
+                                            color: panelColors.text,
                                             overflow: 'hidden',
                                             textOverflow: 'ellipsis',
                                         }}

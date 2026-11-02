@@ -131,7 +131,7 @@ export function CreateSoftTheme(primary: Color, secondary: Color, base: Color): 
             ...text,
             margin: "24px 0",
             padding: 20,
-            background: "#ffffff",
+            background: base._100,
             border: `1px solid ${base._200}`,
             borderRadius: 14,
             overflow: "auto",
@@ -144,7 +144,7 @@ export function CreateSoftTheme(primary: Color, secondary: Color, base: Color): 
         table: {
             margin: "24px 0",
             width: "100%",
-            background: "#ffffff",
+            background: base._100,
             border: `1px solid ${base._200}`,
             borderCollapse: "separate",
             borderSpacing: 0,

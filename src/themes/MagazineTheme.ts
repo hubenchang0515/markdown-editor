@@ -105,7 +105,7 @@ export function CreateMagazineTheme(primary: Color, secondary: Color, base: Colo
             margin: "28px auto",
             padding: 8,
             maxWidth: "100%",
-            background: "#ffffff",
+            background: base._100,
             border: `1px solid ${base._200}`,
         },
 

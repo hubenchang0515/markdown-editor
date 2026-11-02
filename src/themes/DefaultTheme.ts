@@ -123,7 +123,7 @@ export function CreateDefaultTheme(primary: Color, secondary: Color, base: Color
             ...text,
             margin: "20px 0",
             padding: "18px 20px",
-            background: base._50,
+            background: base._100,
             color: base._800,
             border: `1px solid ${base._200}`,
             borderRadius: 10,

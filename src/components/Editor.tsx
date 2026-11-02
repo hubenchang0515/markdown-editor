@@ -7,9 +7,11 @@ export interface EditorProps extends React.HTMLAttributes<HTMLDivElement> {
     onInit?: (editor: EditorInstance) => void;
     onEdit?: (text:string) => void;
     onMove?: (line:number) => void;
+    dark?: boolean;
 }
 
 const Editor = forwardRef<HTMLDivElement, EditorProps>((props, ref) => {
+    const {onInit, onEdit, onMove, dark, ...rawProps} = props;
     const editorRef = useRef<HTMLDivElement>(null);
     const [editor, setEditor] = useState<EditorInstance|null>(null);
 
@@ -43,39 +45,43 @@ const Editor = forwardRef<HTMLDivElement, EditorProps>((props, ref) => {
         }
     }, []);
 
+    // 切换深色模式
+    useEffect(() => {
+        monaco.editor.setTheme(dark ? 'vs-dark' : 'vs');
+    }, [dark]);
+
     // 返回实例
     useEffect(() => {
         if (!editor) return;     
-        props.onInit?.(editor);
-    }, [props.onInit, editor]);
+        onInit?.(editor);
+    }, [onInit, editor]);
 
     // 监听内容变化
     useEffect(() => {
         if (!editor) return;  
 
         const disposable = editor.onDidChangeModelContent(() => {
-            props.onEdit?.(editor.getValue())
+            onEdit?.(editor.getValue())
         });
 
         return () => {
             disposable.dispose();
         }
-    }, [props.onEdit, editor]);
+    }, [onEdit, editor]);
 
     // 监听滚动
     useEffect(() => {
         if (!editor) return;  
 
         const disposable = editor.onDidScrollChange(() => {
-            props.onMove?.(editor?.getVisibleRanges()[0].startLineNumber ?? 0);
+            onMove?.(editor?.getVisibleRanges()[0].startLineNumber ?? 0);
         });
         
         return () => {
             disposable.dispose();
         }
-    }, [props.onMove, editor])
+    }, [onMove, editor])
 
-    const {onInit, onEdit, onMove, ...rawProps} = props;
     return (
         <div 
             ref={setRef}

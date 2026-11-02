@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { render } from "./utils/markdown";
-import { Emerald, PALETTE, Sky, Slate } from "./common/Color";
+import { Emerald, PALETTE, Sky, Slate, invertColor } from "./common/Color";
 import Editor, {type EditorInstance} from "./components/Editor";
 import Preview from "./components/Preview";
 import Button from "./components/Button";
@@ -28,20 +28,37 @@ function App() {
     const [editor, setEditor] = useState<EditorInstance|null>(null);
     const [openQrCodeDialog, setOpenQrCodeDialog] = useState(false);
     const [theme, setTheme] = useState('default');
+    const [dark, setDark] = useState(false);
     const [primaryColor, setPrimaryColor] = useState(DEFAULT_COLORS.primary);
     const [secondaryColor, setSecondaryColor] = useState(DEFAULT_COLORS.secondary);
     const [baseColor, setBaseColor] = useState(DEFAULT_COLORS.base);
     const [readonly, setReadonly] = useState(true);
 
+    // 深色模式下反转三组配色的色阶，浅色背景与深色文字会自动互换
+    const colors = useMemo(() => {
+        const primary = PALETTE[primaryColor] ?? Slate;
+        const secondary = PALETTE[secondaryColor] ?? Slate;
+        const base = PALETTE[baseColor] ?? Slate;
+
+        return dark
+            ? {
+                primary: invertColor(primary),
+                secondary: invertColor(secondary),
+                base: invertColor(base),
+            }
+            : { primary, secondary, base };
+    }, [dark, primaryColor, secondaryColor, baseColor]);
+
     // 根据当前样式和配色生成主题
     const currentTheme = useMemo<Theme>(() => {
         const preset = THEME_PRESETS.find((item) => item.id === theme) ?? THEME_PRESETS[0];
-        return preset.create(
-            PALETTE[primaryColor],
-            PALETTE[secondaryColor],
-            PALETTE[baseColor]
-        );
-    }, [theme, primaryColor, secondaryColor, baseColor]);
+        return preset.create(colors.primary, colors.secondary, colors.base);
+    }, [theme, colors]);
+
+    // 界面（工具栏、边框、预览背景）跟随深色模式
+    const borderColor = dark ? Slate._700 : Slate._200;
+    // 空样式不附带任何内联颜色，保持白底以免黑字不可见
+    const previewBackground = dark && theme !== 'empty' ? colors.base._50 : '#fff';
 
     // 消抖
     const update = useCallback(debounce(setRaw, 10), [setRaw]);
@@ -233,6 +250,9 @@ function App() {
 
         const base = params.get("base");
         if (base && PALETTE[base]) setBaseColor(base);
+
+        const darkParam = params.get("dark");
+        if (darkParam === "1" || darkParam === "true") setDark(true);
     }, []);
 
     return (
@@ -243,7 +263,8 @@ function App() {
                 width:'100%', 
                 display:'flex', 
                 flexDirection:'column', 
-                background: Slate._100, 
+                background: dark ? Slate._900 : Slate._100, 
+                colorScheme: dark ? 'dark' : 'light',
                 padding:8, 
                 gap:8, 
                 boxSizing:'border-box'
@@ -275,15 +296,22 @@ function App() {
                     <Button color={Sky} onClick={copy}>复制</Button>
                     <Button color={Sky} onClick={()=>{iframeRef.current?.contentWindow?.print()}}>打印</Button>
                 </div>
-                <div style={{display:'flex', marginLeft:'auto'}}>
-                    <Select value={theme} options={THEME_OPTIONS} onSelect={(value) => setTheme(value)}/>
+                <div style={{display:'flex', marginLeft:'auto', alignItems:'center', gap:6}}>
+                    <Button
+                        title={dark ? "切换为浅色模式" : "切换为深色模式"}
+                        aria-pressed={dark}
+                        onClick={() => setDark((value) => !value)}
+                    >
+                        {dark ? "浅色" : "深色"}
+                    </Button>
+                    <Select value={theme} options={THEME_OPTIONS} onSelect={(value) => setTheme(value)} dark={dark}/>
                 </div>
                 {
                     theme !== 'empty' &&
                     <>
-                        <ColorPicker label="主色" value={primaryColor} onChange={setPrimaryColor}/>
-                        <ColorPicker label="辅色" value={secondaryColor} onChange={setSecondaryColor}/>
-                        <ColorPicker label="基色" value={baseColor} onChange={setBaseColor}/>
+                        <ColorPicker label="主色" value={primaryColor} onChange={setPrimaryColor} dark={dark}/>
+                        <ColorPicker label="辅色" value={secondaryColor} onChange={setSecondaryColor} dark={dark}/>
+                        <ColorPicker label="基色" value={baseColor} onChange={setBaseColor} dark={dark}/>
                         <Button
                             title="恢复默认配色"
                             onClick={() => {
@@ -317,11 +345,12 @@ function App() {
                         id="editor"
                         ref={editorRef}
                         className="no-print" 
+                        dark={dark}
                         style={{
                             flex:1, 
                             minWidth: 0,
                             minHeight: 0,
-                            border: `1px solid ${Slate._200}`,
+                            border: `1px solid ${borderColor}`,
                             maxWidth: '210mm',
                             display: readonly ? 'none' : 'block'
                         }}
@@ -336,15 +365,16 @@ function App() {
                     ref={iframeRef}
                     className="print-root" 
                     autoHeight={readonly}
+                    background={previewBackground}
                     style={{
                         flex: readonly ? 'none' : 1, 
                         width: readonly ? '100%' : undefined,
                         boxSizing: 'border-box',
                         minWidth: 0,
                         minHeight: '100%',
-                        background:'#fff', 
+                        background: previewBackground, 
                         overflow: readonly ? 'visible' : 'auto', 
-                        border: `1px solid ${Slate._200}`,
+                        border: `1px solid ${borderColor}`,
                         overflowX:'hidden',
                         // 限制预览宽度，保持阅读行宽（不再依赖主题的页面级样式）
                         maxWidth: readonly ? '' : '210mm',

@@ -16,6 +16,24 @@ export interface Palette {
     [key: string]:Color
 }
 
+/** 由浅到深的色阶顺序 */
+export const SHADES: (keyof Color)[] = [
+    "_50", "_100", "_200", "_300", "_400", "_500",
+    "_600", "_700", "_800", "_900", "_950",
+];
+
+/**
+ * 反转色阶：_50 ↔ _950、_100 ↔ _900 ……，_500 保持不变。
+ * 用于将浅色配色组合转换为深色模式。
+ */
+export function invertColor(color: Color): Color {
+    const inverted = {} as Color;
+    SHADES.forEach((shade, index) => {
+        inverted[shade] = color[SHADES[SHADES.length - 1 - index]];
+    });
+    return inverted;
+}
+
 export const PALETTE: Palette = {
     "Red": {
         "_50": "oklch(97.1% 0.013 17.38)",

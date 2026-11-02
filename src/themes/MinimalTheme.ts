@@ -124,7 +124,7 @@ export function CreateMinimalTheme(primary: Color, secondary: Color, base: Color
             ...text,
             margin: "24px 0",
             padding: "20px 24px",
-            background: base._50,
+            background: base._100,
             border: `1px solid ${base._200}`,
             overflow: "auto",
             fontFamily: MONO,
