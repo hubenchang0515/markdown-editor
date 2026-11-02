@@ -58,16 +58,24 @@ function walk(node: Node, language:string, styles:Record<string,string>) {
     node.childNodes.forEach(n => walk(n, language, styles));
 }
 
+function escapeHTML(text:string) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 export function highlight(code:string, language:string) {
-    let html = code;
     const key = language.trim().split(/\s+/)[0];
     const lang = hljs.getLanguage(key);
-    if (lang) {
-        html = hljs.highlight(code, {language: key, ignoreIllegals:true}).value;
-        const div = document.createElement('div');
-        div.innerHTML = html;
-        walk(div, key, STYLES);
-        html = div.innerHTML;
+    if (!lang) {
+        // 未知语言同样需要转义，否则代码中的标签会被浏览器解析
+        return escapeHTML(code);
     }
+
+    let html = hljs.highlight(code, {language: key, ignoreIllegals:true}).value;
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    walk(div, key, STYLES);
+    html = div.innerHTML;
     return html;
 }

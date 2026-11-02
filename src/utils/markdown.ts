@@ -10,6 +10,13 @@ function escapeHTML(text:string) {
     return div.innerHTML;
 }
 
+/** 转义后写入 HTML 属性值，避免引号或尖括号截断属性 */
+function escapeAttribute(text:string) {
+    return escapeHTML(text)
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
 function blobToBase64(file:Blob): Promise<string> {
     return new Promise((resolve, reject) => {
         const reader = new FileReader()
@@ -106,17 +113,20 @@ function createExt(theme?:Theme) {
         renderer: {
             heading(token) {
                 const content = this.parser.parseInline(token.tokens);
-                const id = escapeHTML(content).replace(/\s+/g, "-");
+                const id = escapeHTML(content)
+                    .replace(/\s+/g, "-")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#39;");
                 const line = (token as any).line;
                 switch (token.depth) {
-                    case 1: return `<h1 id=${id} class="line-${line}" style="${styleToString(theme?.h1)}">${content}</h1>`;
-                    case 2: return `<h2 id=${id} class="line-${line}" style="${styleToString(theme?.h2)}">${content}</h2>`;
-                    case 3: return `<h3 id=${id} class="line-${line}" style="${styleToString(theme?.h3)}">${content}</h3>`;
-                    case 4: return `<h4 id=${id} class="line-${line}" style="${styleToString(theme?.h4)}">${content}</h4>`;
-                    case 5: return `<h5 id=${id} class="line-${line}" style="${styleToString(theme?.h5)}">${content}</h5>`;
-                    case 6: return `<h6 id=${id} class="line-${line}" style="${styleToString(theme?.h6)}">${content}</h6>`;
+                    case 1: return `<h1 id="${id}" class="line-${line}" style="${styleToString(theme?.h1)}">${content}</h1>`;
+                    case 2: return `<h2 id="${id}" class="line-${line}" style="${styleToString(theme?.h2)}">${content}</h2>`;
+                    case 3: return `<h3 id="${id}" class="line-${line}" style="${styleToString(theme?.h3)}">${content}</h3>`;
+                    case 4: return `<h4 id="${id}" class="line-${line}" style="${styleToString(theme?.h4)}">${content}</h4>`;
+                    case 5: return `<h5 id="${id}" class="line-${line}" style="${styleToString(theme?.h5)}">${content}</h5>`;
+                    case 6: return `<h6 id="${id}" class="line-${line}" style="${styleToString(theme?.h6)}">${content}</h6>`;
                 }
-                return `<h${token.depth} id=${id} class="line-${line}">${content}</h${token.depth}>`;
+                return `<h${token.depth} id="${id}" class="line-${line}">${content}</h${token.depth}>`;
             },
 
             paragraph(token) {
@@ -146,7 +156,7 @@ function createExt(theme?:Theme) {
             link(token) {
                 const content = this.parser.parseInline(token.tokens);
                 const line = (token as any).line;
-                return `<a class="line-${line}" href="${token.href}" title="${token.title??token.text}" target="_blank" style="${styleToString(theme?.a)}">${content}</a>`;
+                return `<a class="line-${line}" href="${escapeAttribute(token.href)}" title="${escapeAttribute(token.title ?? token.text)}" target="_blank" style="${styleToString(theme?.a)}">${content}</a>`;
             },
 
             blockquote(token) {
@@ -157,7 +167,7 @@ function createExt(theme?:Theme) {
 
             image(token) {
                 const line = (token as any).line;
-                return `<img class="line-${line}" src="${token.href}" title="${token.title}" alt="${token.text}" style="${styleToString(theme?.img)}"/>`;
+                return `<img class="line-${line}" src="${escapeAttribute(token.href)}" title="${escapeAttribute(token.title ?? '')}" alt="${escapeAttribute(token.text)}" style="${styleToString(theme?.img)}"/>`;
             },
 
             codespan(token) {
@@ -166,9 +176,10 @@ function createExt(theme?:Theme) {
             },
 
             code(token) {
-                const code = token.lang ? highlight(token.text, token.lang) : token.text;
+                // 无语言或未知语言时直接转义，避免代码中的 </> 被当成 HTML 解析
+                const code = token.lang ? highlight(token.text, token.lang) : escapeHTML(token.text);
                 const line = (token as any).line;
-                return `<pre class="line-${line} highlight ${token.lang}" style="${styleToString(theme?.pre)}"><code>${code}</code></pre>`;
+                return `<pre class="line-${line} highlight ${escapeAttribute(token.lang ?? '')}" style="${styleToString(theme?.pre)}"><code>${code}</code></pre>`;
             },
 
             table(token) {
