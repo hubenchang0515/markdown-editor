@@ -17,6 +17,19 @@ const THEME_OPTIONS = THEME_PRESETS.map((preset) => ({
     value: preset.id
 }));
 
+// URL 中的配色名不区分大小写
+function findPaletteColor(value: string | null) {
+    if (!value) return null;
+    return Object.keys(PALETTE).find((name) => name.toLowerCase() === value.toLowerCase()) ?? null;
+}
+
+// URL 中可以使用主题 id 或主题名称
+function findTheme(value: string | null) {
+    if (!value) return null;
+    const id = value.toLowerCase();
+    return THEME_PRESETS.find((preset) => preset.id === id || preset.name === value)?.id ?? null;
+}
+
 function App() {
     const inputRef = useRef<HTMLInputElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -220,14 +233,12 @@ function App() {
 
     // 初始化
     useEffect(() => {
-        let paramsString = ""
-        if (window.location.hash) {
-            paramsString = window.location.hash.substring(1)
-        } else if (window.location.search) {
-            paramsString = window.location.search;
-        }
-
-        const params = new URLSearchParams(paramsString);
+        // 同时支持查询参数和 hash 参数，hash 优先
+        // content、mode(dark|light)、theme、primary、secondary、base
+        const params = new URLSearchParams(window.location.search);
+        new URLSearchParams(window.location.hash.substring(1)).forEach((value, key) => {
+            params.set(key, value);
+        });
         const base64md = params.get("content") ?? '';
         if (base64md) {
             setReadonly(true);
@@ -236,23 +247,26 @@ function App() {
             setReadonly(false);
         }
 
-        // 支持通过链接分享样式与配色
-        const themeId = params.get("theme");
-        if (themeId && THEME_PRESETS.some((preset) => preset.id === themeId)) {
-            setTheme(themeId);
+        // 支持通过链接分享模式、主题与配色
+        const themeId = findTheme(params.get("theme"));
+        if (themeId) setTheme(themeId);
+
+        const primary = findPaletteColor(params.get("primary"));
+        if (primary) setPrimaryColor(primary);
+
+        const secondary = findPaletteColor(params.get("secondary"));
+        if (secondary) setSecondaryColor(secondary);
+
+        const base = findPaletteColor(params.get("base"));
+        if (base) setBaseColor(base);
+
+        // mode=dark|light，兼容旧的 dark=1|true
+        const mode = (params.get("mode") || params.get("dark"))?.toLowerCase();
+        if (mode === "dark" || mode === "1" || mode === "true") {
+            setDark(true);
+        } else if (mode === "light" || mode === "0" || mode === "false") {
+            setDark(false);
         }
-
-        const primary = params.get("primary");
-        if (primary && PALETTE[primary]) setPrimaryColor(primary);
-
-        const secondary = params.get("secondary");
-        if (secondary && PALETTE[secondary]) setSecondaryColor(secondary);
-
-        const base = params.get("base");
-        if (base && PALETTE[base]) setBaseColor(base);
-
-        const darkParam = params.get("dark");
-        if (darkParam === "1" || darkParam === "true") setDark(true);
     }, []);
 
     return (
