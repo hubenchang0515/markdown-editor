@@ -1,4 +1,4 @@
-const SITE_MAP = await (await fetch('https://primers.xplanc.org/sitemap.xml')).text();
+import SITE_MAP from 'virtual:sitemap';
 
 const PYTHON_SYMBOLS =  [
     ...SITE_MAP.matchAll(/https:\/\/primers\.xplanc\.org\/document\/zh\/02.Python\/EX.%E5%86%85%E5%BB%BA%E5%87%BD%E6%95%B0\/EX\.(.*?)\.md/g),
