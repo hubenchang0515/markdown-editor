@@ -34,10 +34,14 @@ const Preview = forwardRef<HTMLIFrameElement, PreviewProps>((props, ref) => {
         const content = doc?.getElementById(CONTENT_ID);
         if (!iframe || !doc || !content) return;
 
-        const style = doc.defaultView?.getComputedStyle(doc.body);
-        const marginTop = parseFloat(style?.marginTop ?? '0') || 0;
-        const marginBottom = parseFloat(style?.marginBottom ?? '0') || 0;
-        const contentHeight = content.getBoundingClientRect().height + marginTop + marginBottom;
+        const html = doc.documentElement;
+        const contentHeight = Math.max(
+            html.scrollHeight,
+            html.offsetHeight,
+            html.clientHeight,
+            doc.body ? doc.body.scrollHeight : 0,
+            doc.body ? doc.body.offsetHeight : 0
+        );
 
         // 短内容时撑满一屏；减去页面底部留白，避免产生多余的滚动
         const top = iframe.getBoundingClientRect().top + window.scrollY;
@@ -85,7 +89,7 @@ const Preview = forwardRef<HTMLIFrameElement, PreviewProps>((props, ref) => {
     return (
         <iframe
             ref={setRef}
-            scrolling={autoHeight ? 'no' : undefined}
+            scrolling={autoHeight ? 'no' : undefined}   
             {...rawProps}
         />
     );
